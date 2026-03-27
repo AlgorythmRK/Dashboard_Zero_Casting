@@ -6,6 +6,7 @@ from PIL import Image
 import plotly.graph_objects as go
 from datetime import datetime
 import time
+from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(
     page_title="DANA | Blowhole Detection System",
@@ -13,6 +14,8 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+st_autorefresh(interval=1000, key="clock")
 
 # --------------------------------------------------
 # DANA BRAND CSS
@@ -202,7 +205,7 @@ footer { visibility: hidden; }
 
 /* ── Top-bar header ── */
 .dana-topbar {
-    background: #0d1e3a;
+    background: #ffffff;
     border-bottom: 3px solid #2284c2;
     padding: 0 24px;
     height: 52px;
@@ -216,7 +219,7 @@ footer { visibility: hidden; }
     font-size: 26px;
     font-weight: 800;
     letter-spacing: 4px;
-    color: #ffffff;
+    color: #0d1e3a;
 }
 .dana-logo span { color: #4aa3d9; }
 .dana-nav-right {
@@ -240,7 +243,7 @@ footer { visibility: hidden; }
 }
 .dana-nav-time {
     font-size: 11px;
-    color: rgba(255,255,255,0.85) !important;
+    color: #0d1e3a !important;
     font-family: 'Barlow Condensed', sans-serif;
     letter-spacing: 0.5px;
 }
@@ -484,30 +487,6 @@ footer { visibility: hidden; }
 }
 </style>
 
-<script>
-// Live clock updater — runs every second
-(function startClocks() {
-    function fmt(d) {
-        const pad = n => String(n).padStart(2,'0');
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        return {
-            full: d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear()
-                  + '  ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()),
-            short: pad(d.getHours()) + ':' + pad(d.getMinutes())
-                   + ' | ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear()
-        };
-    }
-    function tick() {
-        const t = fmt(new Date());
-        const sc = document.getElementById('dana-live-clock');
-        const tc = document.getElementById('dana-topbar-clock');
-        if (sc) sc.textContent = t.full;
-        if (tc) tc.textContent = t.short;
-    }
-    tick();
-    setInterval(tick, 1000);
-})();
-</script>
 """, unsafe_allow_html=True)
 
 # --------------------------------------------------
@@ -550,12 +529,17 @@ transform = transforms.Compose([
 # SIDEBAR
 # --------------------------------------------------
 with st.sidebar:
-    st.markdown("""
-    <div class="sidebar-logo-block">
-        <div class="sidebar-logo">DANA<span class="sidebar-logo-accent">.</span></div>
-        <div class="sidebar-logo-sub">Quality Intelligence</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f"""
+<p style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+          color:rgba(255,255,255,0.4);margin:0 0 6px;">
+Session Time
+</p>
+
+<p style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;
+          color:#4aa3d9;margin:0;">
+{datetime.now().strftime("%d %b %Y  %H:%M:%S")}
+</p>
+""", unsafe_allow_html=True)
 
     st.markdown("""
     <p style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
