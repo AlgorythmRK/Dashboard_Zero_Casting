@@ -601,9 +601,6 @@ st.markdown(f"""
     <div class="dana-nav-right">
         <span class="dana-badge dana-badge-live">&#x25CF;&nbsp;Live</span>
         <span class="dana-badge">DIAPL End</span>
-       <span class="dana-nav-time">
-         {datetime.now().strftime("%H:%M | %d %b %Y")}
-      </span>
     </div>
 </div>
 """, unsafe_allow_html=True)
