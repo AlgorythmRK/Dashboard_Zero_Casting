@@ -5,6 +5,7 @@ from torchvision import models, transforms
 from PIL import Image
 import plotly.graph_objects as go
 from datetime import datetime
+import time
 
 st.set_page_config(
     page_title="DANA | Blowhole Detection System",
@@ -99,6 +100,9 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     padding: 14px 16px !important;
     box-shadow: none !important;
 }
+[data-testid="metric-container"] * {
+    color: #0d1e3a !important;
+}
 [data-testid="metric-container"] label {
     font-size: 10px !important;
     font-weight: 700 !important;
@@ -112,8 +116,16 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     font-weight: 700 !important;
     color: #0d1e3a !important;
 }
+[data-testid="metric-container"] [data-testid="stMetricValue"] * {
+    color: #0d1e3a !important;
+}
+[data-testid="metric-container"] p,
+[data-testid="metric-container"] span,
+[data-testid="metric-container"] div {
+    color: #0d1e3a !important;
+}
 
-/* ── File uploader ── */
+/* ── File uploader — force white text everywhere ── */
 [data-testid="stFileUploader"] {
     border: 2px dashed #2284c2 !important;
     border-radius: 4px !important;
@@ -122,6 +134,40 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 }
 [data-testid="stFileUploader"] * {
     font-family: 'Barlow', sans-serif !important;
+}
+/* The dark drag-and-drop inner box */
+[data-testid="stFileUploaderDropzone"] {
+    background: #1a2e4a !important;
+}
+[data-testid="stFileUploaderDropzone"] * {
+    color: #ffffff !important;
+}
+[data-testid="stFileUploaderDropzone"] small,
+[data-testid="stFileUploaderDropzone"] span,
+[data-testid="stFileUploaderDropzone"] p,
+[data-testid="stFileUploaderDropzone"] div {
+    color: #ffffff !important;
+}
+/* Browse files button */
+[data-testid="stFileUploaderDropzone"] button,
+[data-testid="stFileUploaderDropzone"] [data-testid="baseButton-secondary"] {
+    background: #2284c2 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 3px !important;
+}
+[data-testid="stFileUploaderDropzone"] button * {
+    color: #ffffff !important;
+}
+/* Fallback: any button inside uploader */
+[data-testid="stFileUploader"] button {
+    color: #ffffff !important;
+    background: #2284c2 !important;
+    border: none !important;
+}
+[data-testid="stFileUploader"] button p,
+[data-testid="stFileUploader"] button span {
+    color: #ffffff !important;
 }
 
 /* ── Plotly chart ── */
@@ -194,7 +240,7 @@ footer { visibility: hidden; }
 }
 .dana-nav-time {
     font-size: 11px;
-    color: rgba(255,255,255,0.5);
+    color: rgba(255,255,255,0.85) !important;
     font-family: 'Barlow Condensed', sans-serif;
     letter-spacing: 0.5px;
 }
@@ -422,7 +468,46 @@ footer { visibility: hidden; }
 }
 .sidebar-stat-key { color: rgba(255,255,255,0.5) !important; font-size: 11px; }
 .sidebar-stat-val { color: #ffffff !important; font-weight: 600; font-size: 12px; }
+
+/* ── Live clock placeholder ── */
+#dana-live-clock {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #4aa3d9;
+}
+#dana-topbar-clock {
+    font-size: 11px;
+    color: rgba(255,255,255,0.85);
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.5px;
+}
 </style>
+
+<script>
+// Live clock updater — runs every second
+(function startClocks() {
+    function fmt(d) {
+        const pad = n => String(n).padStart(2,'0');
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return {
+            full: d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear()
+                  + '  ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()),
+            short: pad(d.getHours()) + ':' + pad(d.getMinutes())
+                   + ' | ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear()
+        };
+    }
+    function tick() {
+        const t = fmt(new Date());
+        const sc = document.getElementById('dana-live-clock');
+        const tc = document.getElementById('dana-topbar-clock');
+        if (sc) sc.textContent = t.full;
+        if (tc) tc.textContent = t.short;
+    }
+    tick();
+    setInterval(tick, 1000);
+})();
+</script>
 """, unsafe_allow_html=True)
 
 # --------------------------------------------------
@@ -517,15 +602,16 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown(f"""
+    # SESSION TIME — uses live JS clock
+    st.markdown("""
     <p style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
               color:rgba(255,255,255,0.4) !important;margin:0 0 6px;">Session Time</p>
-    <p style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;
-              color:#4aa3d9 !important;margin:0;">{datetime.now().strftime("%d %b %Y  %H:%M:%S")}</p>
+    <div id="dana-live-clock" style="font-family:'Barlow Condensed',sans-serif;font-size:15px;
+         font-weight:600;color:#4aa3d9 !important;margin:0;">--</div>
     """, unsafe_allow_html=True)
 
 # --------------------------------------------------
-# TOP BAR
+# TOP BAR  (live clock via JS id)
 # --------------------------------------------------
 st.markdown(f"""
 <div class="dana-topbar">
@@ -533,14 +619,14 @@ st.markdown(f"""
         <div class="dana-logo">DANA<span>.</span></div>
         <div style="width:1px;height:28px;background:rgba(255,255,255,0.15);"></div>
         <div style="font-size:11px;font-weight:500;letter-spacing:1.5px;
-                    color:rgba(255,255,255,0.45);text-transform:uppercase;">
+                    color:rgba(255,255,255,0.65);text-transform:uppercase;">
             Quality Intelligence Platform
         </div>
     </div>
     <div class="dana-nav-right">
         <span class="dana-badge dana-badge-live">&#x25CF;&nbsp;Live</span>
         <span class="dana-badge">DIAPL End</span>
-        <span class="dana-nav-time">{datetime.now().strftime("%H:%M &nbsp;|&nbsp; %d %b %Y")}</span>
+        <span id="dana-topbar-clock" class="dana-nav-time">--</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -571,7 +657,6 @@ tab1, tab2, tab3 = st.tabs(["📸  Inspection", "📊  Analytics", "ℹ️  Abou
 with tab1:
     col1, col2 = st.columns([1, 1], gap="large")
 
-    # ── Left: Upload ──────────────────────
     with col1:
         st.markdown("""
         <div class="dana-section-head">
@@ -607,7 +692,6 @@ with tab1:
             </div>
             """, unsafe_allow_html=True)
 
-    # ── Right: Results ────────────────────
     with col2:
         st.markdown("""
         <div class="dana-section-head">
