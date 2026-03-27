@@ -585,15 +585,6 @@ Session Time
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    # SESSION TIME — uses live JS clock
-    st.markdown("""
-    <p style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-              color:rgba(255,255,255,0.4) !important;margin:0 0 6px;">Session Time</p>
-    <div id="dana-live-clock" style="font-family:'Barlow Condensed',sans-serif;font-size:15px;
-         font-weight:600;color:#4aa3d9 !important;margin:0;">--</div>
-    """, unsafe_allow_html=True)
-
 # --------------------------------------------------
 # TOP BAR  (live clock via JS id)
 # --------------------------------------------------
@@ -610,7 +601,9 @@ st.markdown(f"""
     <div class="dana-nav-right">
         <span class="dana-badge dana-badge-live">&#x25CF;&nbsp;Live</span>
         <span class="dana-badge">DIAPL End</span>
-        <span id="dana-topbar-clock" class="dana-nav-time">--</span>
+       <span class="dana-nav-time">
+         {datetime.now().strftime("%H:%M | %d %b %Y")}
+      </span>
     </div>
 </div>
 """, unsafe_allow_html=True)
